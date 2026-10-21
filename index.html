@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6558d3" />
+  <meta name="description" content="Ad-free, offline-first notes and PDF annotation." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <title>NoteNest</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button id="menuBtn" class="icon-btn mobile-only" aria-label="Open navigation">☰</button>
+      <div class="brand"><span class="brand-mark">N</span><span>NoteNest</span></div>
+      <label class="search"><span>⌕</span><input id="searchInput" placeholder="Search notes…" autocomplete="off"></label>
+      <button id="themeBtn" class="icon-btn" title="Toggle dark mode">◐</button>
+      <button id="importBackupBtn" class="subtle-btn">Import backup</button><button id="exportAllBtn" class="subtle-btn">Export backup</button>
+    </header>
+    <div class="layout">
+      <aside id="sidebar" class="sidebar">
+        <button id="newNoteBtn" class="primary-btn">＋ New note</button>
+        <button id="importPdfBtn" class="nav-item">▤ Import PDF</button>
+        <button id="importImageBtn" class="nav-item">▧ Add image</button>
+        <div class="side-label">LIBRARY</div>
+        <button class="nav-item active" data-filter="all">▦ All notes <span id="allCount" class="count">0</span></button>
+        <button class="nav-item" data-filter="starred">☆ Starred</button>
+        <button class="nav-item" data-filter="pdf">▤ PDFs</button>
+        <button class="nav-item" data-filter="handwritten">✎ Handwritten</button>
+        <div class="side-label folder-heading">FOLDERS <button id="addFolderBtn" title="New folder">＋</button></div>
+        <div id="folderList"></div>
+        <div class="sidebar-footer">Private by default · No ads</div>
+      </aside>
+      <main class="main">
+        <section id="libraryView" class="library-view">
+          <div class="library-heading">
+            <div><p class="eyebrow">YOUR WORKSPACE</p><h1 id="libraryTitle">All notes</h1><p id="librarySubtitle" class="muted">Your thoughts, all in one place.</p></div>
+            <button id="sortBtn" class="subtle-btn">Recently edited ↓</button>
+          </div>
+          <div id="notesGrid" class="notes-grid"></div>
+          <div id="emptyState" class="empty-state"><div class="empty-icon">✎</div><h2>Your notebook starts here</h2><p>Create a note, import a PDF, or add an image.</p><button id="emptyNewBtn" class="primary-btn">Create your first note</button></div>
+        </section>
+        <section id="editorView" class="editor-view hidden">
+          <div class="editor-top">
+            <button id="backBtn" class="icon-btn" title="Back to notes">←</button>
+            <input id="noteTitle" class="title-input" placeholder="Untitled note" maxlength="180">
+            <button id="starBtn" class="icon-btn" title="Star note">☆</button>
+            <button id="saveStatus" class="status-pill">Saved locally</button>
+            <button id="exportNoteBtn" class="subtle-btn">Export</button>
+            <button id="deleteNoteBtn" class="icon-btn danger" title="Delete note">⌫</button>
+          </div>
+          <div id="editorTools" class="tools">
+            <button class="tool active" data-mode="text">T Text</button>
+            <button class="tool" data-mode="pen">✎ Pen</button>
+            <button class="tool" data-mode="highlighter">▰ Highlighter</button>
+            <button class="tool" data-mode="eraser">⌫ Eraser</button>
+            <span class="tool-separator"></span>
+            <label class="tool-color" title="Ink color"><input id="inkColor" type="color" value="#29243d"></label>
+            <label class="thickness-label">Size <input id="inkSize" type="range" min="1" max="24" value="4"></label>
+            <button id="undoBtn" class="tool">↶ Undo</button>
+            <button id="redoBtn" class="tool">↷ Redo</button>
+            <select id="templateSelect" class="template-select" aria-label="Page template">
+              <option value="plain">Plain page</option><option value="lined">Lined</option><option value="grid">Grid</option><option value="dotted">Dotted</option>
+            </select>
+            <button id="addImageEditorBtn" class="tool">＋ Image</button>
+          </div>
+          <div id="documentMeta" class="document-meta"></div>
+          <div id="pageStage" class="page-stage">
+            <div id="paper" class="paper template-plain">
+              <textarea id="noteBody" class="note-body" placeholder="Start writing…&#10;&#10;Switch to Pen to draw on the page."></textarea>
+              <canvas id="inkCanvas"></canvas>
+            </div>
+          </div>
+          <div id="pdfControls" class="pdf-controls hidden">
+            <button id="prevPageBtn" class="subtle-btn">← Previous</button><span id="pageCounter">Page 1 / 1</span><button id="nextPageBtn" class="subtle-btn">Next →</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <input id="pdfFile" type="file" accept="application/pdf,.pdf" hidden>
+    <input id="imageFile" type="file" accept="image/*" hidden>
+    <input id="backupFile" type="file" accept="application/json,.json" hidden>
+    <dialog id="folderDialog" class="modal">
+      <form method="dialog" id="folderForm"><h2>New folder</h2><input id="folderName" required maxlength="60" placeholder="Folder name"><div class="modal-actions"><button class="subtle-btn" value="cancel">Cancel</button><button id="createFolderConfirm" class="primary-btn" value="create">Create folder</button></div></form>
+    </dialog>
+    <dialog id="folderMoveDialog" class="modal">
+      <form method="dialog" id="moveForm"><h2>Move note to folder</h2><select id="moveFolderSelect"><option value="">Unfiled</option></select><div class="modal-actions"><button class="subtle-btn" value="cancel">Cancel</button><button id="moveConfirm" class="primary-btn" value="move">Move</button></div></form>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
