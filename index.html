@@ -13,11 +13,12 @@
   <div id="app">
     <header class="topbar">
       <button id="menuBtn" class="icon-btn mobile-only" aria-label="Open navigation">☰</button>
-      <div class="brand"><span class="brand-mark">N</span><span>NoteNest</span></div>
-      <label class="search"><span>⌕</span><input id="searchInput" placeholder="Search notes…" autocomplete="off"></label>
+      <div class="brand"><span class="brand-mark">N</span><span class="brand-name">NoteNest</span></div>
+      <label class="search"><span>⌕</span><input id="searchInput" placeholder="Search…" autocomplete="off"></label>
       <button id="themeBtn" class="icon-btn" title="Toggle dark mode">◐</button>
       <button id="importBackupBtn" class="subtle-btn">Import backup</button><button id="exportAllBtn" class="subtle-btn">Export backup</button>
     </header>
+    <div id="backdrop" class="backdrop"></div>
     <div class="layout">
       <aside id="sidebar" class="sidebar">
         <button id="newNoteBtn" class="primary-btn">＋ New note</button>
@@ -30,6 +31,9 @@
         <button class="nav-item" data-filter="handwritten">✎ Handwritten</button>
         <div class="side-label folder-heading">FOLDERS <button id="addFolderBtn" title="New folder">＋</button></div>
         <div id="folderList"></div>
+        <div class="side-label mobile-only">BACKUP</div>
+        <button id="sideImportBtn" class="nav-item mobile-only">⇪ Import backup</button>
+        <button id="sideExportBtn" class="nav-item mobile-only">⇩ Export backup</button>
         <div class="sidebar-footer">Private by default · No ads</div>
       </aside>
       <main class="main">
