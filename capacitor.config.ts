@@ -4,6 +4,6 @@ const config: CapacitorConfig = {
   appName: 'NoteNest',
   webDir: 'dist',
   bundledWebRuntime: false,
-  android: { allowMixedContent: false }
+  android: { allowMixedContent: false, adjustMarginsForEdgeToEdge: 'force' } as any
 };
 export default config;
