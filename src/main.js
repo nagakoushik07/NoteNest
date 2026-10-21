@@ -1,5 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import './style.css';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -206,7 +209,15 @@ async function renderPdfIntoNewNote(file) {
   const n=defaultNote('pdf'); n.title=file.name.replace(/\.pdf$/i,''); n.pdfName=file.name; n.pdfData=Array.from(bytes); n.pdfAnnotations={}; n.createdAt=now(); n.updatedAt=now();
   await dbPut(n); await refresh(); await openNote(n.id);
 }
-function downloadBlob(blob,name) {
+async function downloadBlob(blob,name) {
+  if(Capacitor.isNativePlatform()){
+    try{
+      const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(blob);});
+      const f=await Filesystem.writeFile({path:name,data,directory:Directory.Cache});
+      await Share.share({title:name,url:f.uri,dialogTitle:'Save or share '+name});
+    }catch(e){if(!/cancel/i.test(String(e&&e.message||e)))toast('Could not export file');}
+    return;
+  }
   const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 async function exportCurrent() {
@@ -264,10 +275,15 @@ $('backupFile').onchange=async e=>{const f=e.target.files[0];if(f)await importBa
 $('pageStage').addEventListener('click',e=>{const b=e.target.closest('[data-remove-image]');if(b){imageAttachments.splice(Number(b.dataset.removeImage),1);renderImages();scheduleSave();}});
 $('prevPageBtn').onclick=async()=>{if(pdfDoc&&pdfPage>1){pdfPage--;await renderPdfPage(notes.find(x=>x.id===currentId));scheduleSave();}};
 $('nextPageBtn').onclick=async()=>{if(pdfDoc&&pdfPage<pdfDoc.numPages){pdfPage++;await renderPdfPage(notes.find(x=>x.id===currentId));scheduleSave();}};
-$('menuBtn').onclick=()=>$('sidebar').classList.toggle('sidebar-open');
+const setSidebar=o=>{$('sidebar').classList.toggle('sidebar-open',o);$('backdrop').classList.toggle('show',o);};
+$('menuBtn').onclick=()=>setSidebar(!$('sidebar').classList.contains('sidebar-open'));
+$('backdrop').onclick=()=>setSidebar(false);
+$('sidebar').addEventListener('click',e=>{if(e.target.closest('button')&&!e.target.closest('#addFolderBtn'))setSidebar(false);});
+$('sideExportBtn').onclick=exportBackup;
+$('sideImportBtn').onclick=()=>$('backupFile').click();
 window.addEventListener('resize',()=>{if(currentId && !$('editorView').classList.contains('hidden') && !pdfDoc)resizeCanvas();});
 window.addEventListener('beforeunload',()=>{if(currentId)saveCurrent();});
-document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveCurrent();}if(e.key==='Escape')$('sidebar').classList.remove('sidebar-open');});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveCurrent();}if(e.key==='Escape')setSidebar(false);});
 
 async function init() {
   db=await openDB(); await refresh();
